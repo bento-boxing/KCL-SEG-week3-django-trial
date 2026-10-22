@@ -7,6 +7,18 @@
 
 <p>{{ service_request.description|linebreaksbr|default:"No description." }}</p>
 
+    <section style="margin: 40px 0;">
+    <hr>
+    {% for comment in comments %}
+        <p><b>{{ comment.author }}</b> <small>{{ comment.datetime }}</small></p>
+        <p>{{ comment.body }}</p>
+        <a class="btn btn-primary" href="{%  url 'update_comment' service_request.pk comment.pk %}">Edit Comment</a>
+        <a class="btn btn-danger" href="{% url 'delete_comment' service_request.pk comment.pk %}">Delete Comment</a>
+        <hr>
+    {% endfor %}
+        <a class="btn btn-primary" href="{% url 'create_comment' service_request.pk %}">New Comment</a>
+    </section>
+
 <a class="btn btn-primary" href="{% url 'update_request' service_request.pk %}">Edit</a>
 <a class="btn btn-danger" href="{% url 'delete_request' service_request.pk %}">Delete</a>
 <a class="btn btn-secondary" href="{% url 'list_request' %}">Back to list</a>
