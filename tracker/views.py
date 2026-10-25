@@ -40,3 +40,8 @@ def delete_request(request, pk):
 def list_archived_requests(request):
     return render(request, 'archived_requests.html', {'requests': Request.objects.filter(archived=True)})
 
+def archive_request(request, pk):
+    service_request = get_object_or_404(Request, pk=pk)
+    service_request.archived = True
+    service_request.save()
+    return redirect('list_request')

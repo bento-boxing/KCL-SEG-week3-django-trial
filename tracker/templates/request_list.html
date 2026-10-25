@@ -22,6 +22,9 @@
           <a href="{% url 'view_request' request.pk %}" title="Show"><i class="bi bi-eye"></i></a>
           <a href="{% url 'update_request' request.pk %}" title="Edit"><i class="bi bi-pencil"></i></a>
           <a class="text-danger" href="{% url 'delete_request' request.pk %}" title="Delete"><i class="bi bi-trash"></i></a>
+          <a class="text-secondary" href="{% url 'archive_request' request.pk %}" title="Archive">
+            <i class="bi bi-archive"></i>
+          </a>
         </td>
       </tr>
     {% empty %}
@@ -31,4 +34,5 @@
 </table>
 
 <a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
+<a class="btn btn-outline-secondary" href="{% url 'list_archived_request' %}">View Archive</a>
 {% endblock %}
