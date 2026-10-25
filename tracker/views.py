@@ -5,7 +5,7 @@ from .models import Request
 
 
 def list_request(request):
-    return render(request, 'request_list.html', {'requests': Request.objects.all()})
+    return render(request, 'request_list.html', {'requests': Request.objects.filter(archived=False)})
 
 
 def view_request(request, pk):
@@ -36,4 +36,7 @@ def delete_request(request, pk):
         service_request.delete()
         return redirect('list_request')
     return render(request, 'request_confirm_delete.html', {'service_request': service_request})
+
+def list_archived_requests(request):
+    return render(request, 'archived_requests.html', {'requests': Request.objects.filter(archived=True)})
 
