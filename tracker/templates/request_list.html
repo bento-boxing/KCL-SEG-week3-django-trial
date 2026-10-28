@@ -3,38 +3,6 @@
 {% block heading %}Requests{% endblock %}
 
 {% block content %}
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Title</th>
-      <th>Description</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for request in requests %}
-      <tr>
-        <td>{{ request.pk }}</td>
-        <td><a href="{% url 'view_request' request.pk %}">{{ request.title }}</a></td>
-        <td>{{ request.description|truncatechars:80 }}</td>
-        <td>
-          <a href="{% url 'view_request' request.pk %}" title="Show"><i class="bi bi-eye"></i></a>
-          <a href="{% url 'update_request' request.pk %}" title="Edit"><i class="bi bi-pencil"></i></a>
-          <a class="text-danger" href="{% url 'delete_request' request.pk %}" title="Delete"><i class="bi bi-trash"></i></a>
-          <a class="text-secondary" href="{% url 'archive_request' request.pk %}" title="Archive">
-            <i class="bi bi-archive"></i>
-          </a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="4">No requests yet.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
-<a class="btn btn-outline-secondary" href="{% url 'list_archived_request' %}">View Archive</a>
     <label>
         <input type='search' name='search' placeholder='Search something...' value='{{ search_str }}' id='search_bar'>
     </label>
@@ -108,7 +76,7 @@
             const archiveBtn = createBtnElement(archive_request_url, 'Archive', 'bi-archive', request.id);
           
             deleteBtn.classList.add('text-danger');
-            btnCell.append(showBtn, editBtn, deleteBtn);
+            btnCell.append(showBtn, editBtn, deleteBtn, archiveBtn);
 
             row.append(idCell, titleCell, descriptionCell, btnCell);
             row.dataset.text = request.title.toLowerCase() + " " + requestDescription.toLowerCase();
