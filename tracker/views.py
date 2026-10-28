@@ -6,7 +6,7 @@ from .models import Request, Comment
 
 
 def list_request(request):
-    requests = Request.objects.all()
+    requests = Request.objects.filter(archived=False)
 
     requests_data = [model_to_dict(i) for i in requests]
 
@@ -43,6 +43,14 @@ def delete_request(request, pk):
         return redirect('list_request')
     return render(request, 'request_confirm_delete.html', {'service_request': service_request})
 
+def list_archived_requests(request):
+    return render(request, 'archived_requests.html', {'requests': Request.objects.filter(archived=True)})
+
+def archive_request(request, pk):
+    service_request = get_object_or_404(Request, pk=pk)
+    service_request.archived = True
+    service_request.save()
+    return redirect('list_request')
 def create_comment(request, pk):
     form = CommentForm(request.POST or None)
     if form.is_valid():

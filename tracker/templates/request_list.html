@@ -3,6 +3,38 @@
 {% block heading %}Requests{% endblock %}
 
 {% block content %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for request in requests %}
+      <tr>
+        <td>{{ request.pk }}</td>
+        <td><a href="{% url 'view_request' request.pk %}">{{ request.title }}</a></td>
+        <td>{{ request.description|truncatechars:80 }}</td>
+        <td>
+          <a href="{% url 'view_request' request.pk %}" title="Show"><i class="bi bi-eye"></i></a>
+          <a href="{% url 'update_request' request.pk %}" title="Edit"><i class="bi bi-pencil"></i></a>
+          <a class="text-danger" href="{% url 'delete_request' request.pk %}" title="Delete"><i class="bi bi-trash"></i></a>
+          <a class="text-secondary" href="{% url 'archive_request' request.pk %}" title="Archive">
+            <i class="bi bi-archive"></i>
+          </a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">No requests yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
+<a class="btn btn-outline-secondary" href="{% url 'list_archived_request' %}">View Archive</a>
     <label>
         <input type='search' name='search' placeholder='Search something...' value='{{ search_str }}' id='search_bar'>
     </label>
@@ -20,6 +52,7 @@
     </table>
 
     <a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
+    <a class="btn btn-outline-secondary" href="{% url 'list_archived_request' %}">View Archive</a>
 
     {{ requests_data|json_script:"requests-data" }}
 
@@ -32,6 +65,7 @@
         const view_request_url = '{% url 'view_request' 987654321 %}';
         const update_request_url = '{% url 'update_request' 987654321 %}';
         const delete_request_url = '{% url 'delete_request' 987654321 %}';
+        const archive_request_url = '{% url 'archive_request' 987654321 %}';
 
         const request_list_element = document.getElementById('request_list');
         const search_bar_element = document.getElementById('search_bar');
@@ -71,6 +105,8 @@
             const showBtn = createBtnElement(view_request_url, 'Show', 'bi-eye', request.id)
             const editBtn = createBtnElement(update_request_url, 'Edit', 'bi-pencil', request.id)
             const deleteBtn = createBtnElement(delete_request_url, 'Delete', 'bi-trash', request.id);
+            const archiveBtn = createBtnElement(archive_request_url, 'Archive', 'bi-archive', request.id);
+          
             deleteBtn.classList.add('text-danger');
             btnCell.append(showBtn, editBtn, deleteBtn);
 
