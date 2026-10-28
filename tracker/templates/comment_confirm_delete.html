@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block heading %}Delete comment {{ comment.id }} for request {{ comment.request }}{% endblock %}
+
+{% block content %}
+<p class="text-muted">Comment #{{ comment.id }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <p>Are you sure you want to delete the comment below? This cannot be undone.</p>
+
+    <hr style="margin-top:40px;">
+    <p><b>{{ comment.author }}</b> <small>{{ comment.datetime }}</small></p>
+    <p>{{ comment.body }}</p>
+    <hr>
+
+  <button class="btn btn-danger" type="submit">Delete</button>
+  <a class="btn btn-secondary" href="{% url 'view_request' comment.request.id %}">Cancel</a>
+</form>
+{% endblock %}
