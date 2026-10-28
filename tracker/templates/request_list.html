@@ -3,32 +3,150 @@
 {% block heading %}Requests{% endblock %}
 
 {% block content %}
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Title</th>
-      <th>Description</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for request in requests %}
-      <tr>
-        <td>{{ request.pk }}</td>
-        <td><a href="{% url 'view_request' request.pk %}">{{ request.title }}</a></td>
-        <td>{{ request.description|truncatechars:80 }}</td>
-        <td>
-          <a href="{% url 'view_request' request.pk %}" title="Show"><i class="bi bi-eye"></i></a>
-          <a href="{% url 'update_request' request.pk %}" title="Edit"><i class="bi bi-pencil"></i></a>
-          <a class="text-danger" href="{% url 'delete_request' request.pk %}" title="Delete"><i class="bi bi-trash"></i></a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="4">No requests yet.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <label>
+        <input type='search' name='search' placeholder='Search something...' value='{{ search_str }}' id='search_bar'>
+    </label>
+    <table class='table table-hover'>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="request_list">
+        </tbody>
+    </table>
 
-<a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
+    <a class="btn btn-primary" href="{% url 'create_request' %}">New request</a>
+
+    {{ requests_data|json_script:"requests-data" }}
+
+    <script>
+        const TRUNCATE_STRING_LIMIT = 80;
+        const FUNCTION_DEBOUNCE_DEFAULT_TIME = 300;
+        const MATCH_THRESHOLD = .7;
+
+        const URL_PLACEHOLDER = '987654321';
+        const view_request_url = '{% url 'view_request' 987654321 %}';
+        const update_request_url = '{% url 'update_request' 987654321 %}';
+        const delete_request_url = '{% url 'delete_request' 987654321 %}';
+
+        const request_list_element = document.getElementById('request_list');
+        const search_bar_element = document.getElementById('search_bar');
+        const requests_data = JSON.parse(document.getElementById("requests-data").textContent);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            requests_data.forEach(i => {
+                request_list_element.appendChild(createRequestElement(i));
+            });
+
+            search(search_bar_element.value);
+        });
+
+        search_bar_element.addEventListener('input',
+            debounce(function () {
+                search(search_bar_element.value);
+            }, FUNCTION_DEBOUNCE_DEFAULT_TIME)
+        );
+
+        function createRequestElement(request) {
+            const row = document.createElement('tr');
+
+            const idCell = document.createElement('td');
+            idCell.textContent = request.id;
+
+            const titleCell = document.createElement('td');
+            const titleLink = document.createElement('a');
+            titleLink.href = replaceLast(view_request_url, URL_PLACEHOLDER, request.id);
+            titleLink.textContent = request.title;
+            titleCell.appendChild(titleLink);
+
+            const descriptionCell = document.createElement('td');
+            const requestDescription = request.description ?? '';
+            descriptionCell.textContent = truncateString(requestDescription, TRUNCATE_STRING_LIMIT);
+
+            const btnCell = document.createElement('td');
+            const showBtn = createBtnElement(view_request_url, 'Show', 'bi-eye', request.id)
+            const editBtn = createBtnElement(update_request_url, 'Edit', 'bi-pencil', request.id)
+            const deleteBtn = createBtnElement(delete_request_url, 'Delete', 'bi-trash', request.id);
+            deleteBtn.classList.add('text-danger');
+            btnCell.append(showBtn, editBtn, deleteBtn);
+
+            row.append(idCell, titleCell, descriptionCell, btnCell);
+            row.dataset.text = request.title.toLowerCase() + " " + requestDescription.toLowerCase();
+            return row;
+        }
+
+        function createBtnElement(url, title, icon, id) {
+            const btnElement = document.createElement('a');
+            const iconElement = document.createElement('i');
+
+            iconElement.classList.add("bi", icon);
+            btnElement.href = replaceLast(url, URL_PLACEHOLDER, id);
+            btnElement.title = title;
+            btnElement.appendChild(iconElement);
+
+            return btnElement;
+        }
+
+        function replaceLast(str, target, replacement) {
+            let index = str.lastIndexOf(target);
+            if (index === -1) {
+                return str;
+            }
+            return str.slice(0, index) + replacement + str.slice(index + target.length);
+        }
+
+        function truncateString(str, limit) {
+            if (str.length <= limit) {
+                return str;
+            }
+            return str.slice(0, limit - 3) + '...';
+        }
+
+        function debounce(func, delay) {
+            let timer;
+            return function () {
+                clearTimeout(timer);
+
+                timer = setTimeout(() => {
+                    func.apply();
+                }, delay);
+            }
+        }
+
+        function search(str) {
+            const keyword_list = splitIntoKeywordList(str);
+
+            request_list_element.querySelectorAll('tr').forEach(i => {
+                i.hidden = !matchKeywordThreshold(i.dataset.text, keyword_list);
+            });
+
+            updateURL(str);
+        }
+
+        function updateURL(str) {
+            let query = '';
+            if (str.trim()) {
+                query += '?search=' + str.trim();
+            }
+            history.replaceState(null, '', window.location.pathname + query);
+        }
+
+        function splitIntoKeywordList(str) {
+            return str.trim().toLowerCase().split(/\s+/);
+        }
+
+        function matchKeywordThreshold(str, keyword_list) {
+            let count = 0;
+            keyword_list.forEach(i => {
+                if (str.includes(i)) {
+                    count += 1;
+                }
+            });
+            return count / keyword_list.length >= MATCH_THRESHOLD;
+        }
+    </script>
 {% endblock %}

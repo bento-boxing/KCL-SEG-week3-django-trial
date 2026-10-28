@@ -1,3 +1,4 @@
+from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RequestForm
@@ -5,7 +6,11 @@ from .models import Request
 
 
 def list_request(request):
-    return render(request, 'request_list.html', {'requests': Request.objects.all()})
+    requests = Request.objects.all()
+
+    requests_data = [model_to_dict(i) for i in requests]
+
+    return render(request, 'request_list.html', {'requests_data': requests_data, 'search_str': request.GET.get('search', ''),})
 
 
 def view_request(request, pk):
